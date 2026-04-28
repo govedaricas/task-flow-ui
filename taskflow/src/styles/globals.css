@@ -1,0 +1,201 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .auth-root {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--color-background-tertiary);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2.5rem;
+  }
+
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--color-text-primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-mark svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--color-background-primary);
+  }
+
+  .brand-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--color-text-primary);
+  }
+
+  .card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem 2.25rem;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    margin-bottom: 1.75rem;
+    gap: 1.5rem;
+  }
+
+  .tab {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-text-tertiary);
+    padding-bottom: 10px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 1.5px solid transparent;
+    margin-bottom: -0.5px;
+    letter-spacing: 0.02em;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .tab.active {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-text-primary);
+    font-weight: 500;
+  }
+
+  .form-section { display: none; }
+  .form-section.active { display: block; }
+
+  .field {
+    margin-bottom: 1rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .field input {
+    width: 100%;
+    height: 38px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 0 12px;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .field input:focus {
+    border-color: var(--color-border-primary);
+    background: var(--color-background-primary);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+  }
+
+  .field .error {
+    font-size: 11px;
+    color: var(--color-text-danger);
+    margin-top: 4px;
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    height: 40px;
+    margin-top: 1.5rem;
+    background: var(--color-text-primary);
+    color: var(--color-background-primary);
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:active { transform: scale(0.99); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 1.25rem 0;
+  }
+
+  .divider span {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--color-border-tertiary);
+  }
+
+  .message {
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-md);
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .message.success {
+    background: var(--color-background-success);
+    color: var(--color-text-success);
+  }
+
+  .message.error {
+    background: var(--color-background-danger);
+    color: var(--color-text-danger);
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  .hint-accent {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    margin-top: 1.25rem;
+    letter-spacing: 0.03em;
+  }
