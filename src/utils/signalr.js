@@ -12,33 +12,46 @@ class SignalRService {
   async startConnection() {
     try {
       const token = localStorage.getItem('token')
-
       if (!token) {
         console.log('No token found, skipping SignalR connection')
         return
       }
 
-      console.log('Attempting SignalR connection to https://localhost:7004/hubs/task')
-
       this.connection = new HubConnectionBuilder()
         .withUrl(`${API_BASE}/hubs/task`, {
-          accessTokenFactory: () => {
-            console.log('Providing JWT token for SignalR auth')
-            return token
-          }
+          accessTokenFactory: () => token,
+          skipNegotiation: true,
+          transport: signalR.HttpTransportType.WebSockets
         })
-        .withAutomaticReconnect()
-        .configureLogging(LogLevel.Debug)
+        .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+        .configureLogging(signalR.LogLevel.Warning)
         .build()
+
+      // Keepalive da Render proxy ne ubije konekciju
+      this.connection.keepAliveIntervalInMilliseconds = 15000
+      this.connection.serverTimeoutInMilliseconds = 60000
+
+      this.connection.onreconnecting(() => {
+        this.isConnected = false
+        console.log('SignalR reconnecting...')
+      })
+
+      this.connection.onreconnected(() => {
+        this.isConnected = true
+        console.log('SignalR reconnected:', this.connection.connectionId)
+      })
+
+      this.connection.onclose(() => {
+        this.isConnected = false
+        console.log('SignalR connection closed')
+      })
 
       await this.connection.start()
       this.isConnected = true
-      console.log('SignalR connected successfully with connection ID:', this.connection.connectionId)
+      console.log('SignalR connected:', this.connection.connectionId)
 
-      // Set up listeners that were registered before connection
       for (const [event, callback] of this.listeners) {
         this.connection.on(event, callback)
-        console.log(`Registered listener for event: ${event}`)
       }
 
     } catch (error) {
