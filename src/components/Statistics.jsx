@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
 import UserProfileModal from './UserProfileModal'
+import { useLoading } from './LoadingContext'
 import './statistics.css'
 
 const Statistics = ({ statsUpdate }) => {
+  const { setLoading } = useLoading()
   const [stats, setStats] = useState({
     totalTasks: 0,
     totalProjects: 0,
@@ -16,6 +18,7 @@ const Statistics = ({ statsUpdate }) => {
 
   useEffect(() => {
     const fetchStats = async () => {
+      setLoading(true)
       try {
         const tasks = await api('api/tasks')
         const projects = await api('api/projects/search', {
@@ -33,6 +36,8 @@ const Statistics = ({ statsUpdate }) => {
         })
       } catch (error) {
         console.error('Error fetching stats:', error)
+      } finally {
+        setLoading(false)
       }
     }
 

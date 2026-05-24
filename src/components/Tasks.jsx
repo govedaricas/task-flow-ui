@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { getAllTasks, updateTaskStatus, createTask, updateTask, deleteTask, getTaskAuditLogs } from '../api/tasks'
 import { Toast } from './Toast'
+import { useLoading } from './LoadingContext'
 import signalRService from '../utils/signalr'
 import './tasks.css'
 
 const Tasks = ({ onStatsUpdate }) => {
+  const { setLoading } = useLoading()
   const [tasks, setTasks] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -121,12 +123,15 @@ const Tasks = ({ onStatsUpdate }) => {
   }, [onStatsUpdate])
 
   const fetchTasks = async () => {
+    setLoading(true)
     try {
       const data = await getAllTasks()
       setTasks(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error fetching tasks:', error)
       showToast('Error fetching tasks', 'error')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -164,6 +169,7 @@ const Tasks = ({ onStatsUpdate }) => {
   const handleViewAuditHistory = async () => {
     if (!selectedTask) return
 
+    setLoading(true)
     setLoadingAudit(true)
     setShowAuditHistory(true)
 
@@ -176,6 +182,7 @@ const Tasks = ({ onStatsUpdate }) => {
       showToast('Error loading audit logs', 'error')
     } finally {
       setLoadingAudit(false)
+      setLoading(false)
     }
   }
 
@@ -187,6 +194,7 @@ const Tasks = ({ onStatsUpdate }) => {
   const confirmDeleteTask = async () => {
     if (!selectedTaskToDelete) return
 
+    setLoading(true)
     try {
       await deleteTask(selectedTaskToDelete.id)
       setTasks(tasks.filter(t => t.id !== selectedTaskToDelete.id))
@@ -197,6 +205,7 @@ const Tasks = ({ onStatsUpdate }) => {
     } finally {
       setSelectedTaskToDelete(null)
       setShowDeleteConfirm(false)
+      setLoading(false)
     }
   }
 
@@ -206,6 +215,7 @@ const Tasks = ({ onStatsUpdate }) => {
   }
 
   const handleStatusChange = async (taskId, newStatusId) => {
+    setLoading(true)
     try {
       await updateTaskStatus(taskId, newStatusId)
       setTasks(tasks.map(task => task.id === taskId ? { ...task, taskStatusId: newStatusId } : task))
@@ -213,6 +223,8 @@ const Tasks = ({ onStatsUpdate }) => {
     } catch (error) {
       console.error('Error updating status:', error)
       showToast('Error updating status', 'error')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -224,6 +236,7 @@ const Tasks = ({ onStatsUpdate }) => {
       return
     }
 
+    setLoading(true)
     try {
       if (editingTask) {
         await updateTask({
@@ -248,6 +261,8 @@ const Tasks = ({ onStatsUpdate }) => {
     } catch (error) {
       console.error('Error saving task:', error)
       showToast('Error saving task', 'error')
+    } finally {
+      setLoading(false)
     }
   }
 

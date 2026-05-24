@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { registerUser } from './api/auth'
 import { useNavigate } from 'react-router-dom'
+import { useLoading } from './components/LoadingContext'
 import validateRegister from './utils/validateRegister'
 
 const initialForm = {
@@ -18,6 +19,7 @@ const placeholders = {
 
 function Register() {
   const navigate = useNavigate()
+  const { setLoading, loading } = useLoading()
   const [form, setForm] = useState(initialForm)
   const [errors, setErrors] = useState({})
   const [message, setMessage] = useState('')
@@ -32,6 +34,7 @@ function Register() {
     if (Object.keys(e).length > 0) return setErrors(e)
     setErrors({})
 
+    setLoading(true)
     try {
       await registerUser(form)
       setMsgType('success')
@@ -39,6 +42,8 @@ function Register() {
     } catch (err) {
       setMsgType('error')
       setMessage(err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -93,7 +98,9 @@ function Register() {
           </div>
         ))}
 
-        <button className="submit-btn" onClick={handleSubmit}>Create account</button>
+        <button className="submit-btn" onClick={handleSubmit} disabled={loading}>
+          {loading ? 'Creating account...' : 'Create account'}
+        </button>
 
         {message && <p className={`message ${msgType}`}>{message}</p>}
       </div>

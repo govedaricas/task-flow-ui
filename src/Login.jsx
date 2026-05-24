@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './components/AuthContext'
+import { useLoading } from './components/LoadingContext'
 import { loginUser } from './api/auth'
 import validateLogin from './utils/validateLogin'
 import Toast from './components/Toast'
@@ -10,6 +11,7 @@ const initialForm = { username: '', password: '' }
 function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { loading, setLoading } = useLoading()
   const [form, setForm] = useState(initialForm)
   const [errors, setErrors] = useState({})
   const [toast, setToast] = useState({ message: '', type: '' })
@@ -23,12 +25,15 @@ function Login() {
     if (Object.keys(e).length > 0) return setErrors(e)
     setErrors({})
 
+    setLoading(true)
     try {
       const res = await loginUser(form)
       login(res.responseModel.token)
       navigate('/dashboard')
     } catch (err) {
       setToast({ message: err.message, type: 'error' })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -67,7 +72,9 @@ function Login() {
           </div>
         ))}
 
-        <button className="submit-btn" onClick={handleSubmit}>Sign in</button>
+        <button className="submit-btn" onClick={handleSubmit} disabled={loading}>
+          {loading ? 'Signing in...' : 'Sign in'}
+        </button>
 
         <p className="hint-accent">
           Forgot password?{' '}

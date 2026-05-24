@@ -7,7 +7,7 @@ export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [authLoading, setAuthLoading] = useState(true)
 
   useEffect(() => {
     const token = getToken()
@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
       // Assume user is logged in if token exists
       setUser({ token })
     }
-    setLoading(false)
+    setAuthLoading(false)
   }, [])
 
   const login = (token) => {
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, authLoading }}>
       {children}
     </AuthContext.Provider>
   )

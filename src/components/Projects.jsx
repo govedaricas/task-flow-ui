@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { getAllProjects } from '../api/projects'
 import { Toast } from './Toast'
+import { useLoading } from './LoadingContext'
 import './projects.css'
 
 const Projects = () => {
+  const { setLoading } = useLoading()
   const [projects, setProjects] = useState([])
   const [toast, setToast] = useState(null)
 
@@ -12,12 +14,15 @@ const Projects = () => {
   }, [])
 
   const fetchProjects = async () => {
+    setLoading(true)
     try {
       const data = await getAllProjects()
       setProjects(data.data || [])
     } catch (error) {
       console.error('Error fetching projects:', error)
       showToast('Error fetching projects', 'error')
+    } finally {
+      setLoading(false)
     }
   }
 
