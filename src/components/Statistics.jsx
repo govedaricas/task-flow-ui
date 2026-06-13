@@ -85,11 +85,11 @@ const Statistics = ({ statsUpdate }) => {
     if (statsUpdate) {
       setStats(prevStats => ({
         ...prevStats,
-        completedTasks: statsUpdate.completedTasks,
-        inProgressTasks: statsUpdate.inProgressTasks,
-        onHoldTasks: statsUpdate.onHoldTasks ?? prevStats.onHoldTasks,
-        cancelledTasks: statsUpdate.cancelledTasks ?? prevStats.cancelledTasks,
-        toDoTasks: statsUpdate.toDoTasks
+        completedTasks: Number(statsUpdate.completedTasks) || prevStats.completedTasks,
+        inProgressTasks: Number(statsUpdate.inProgressTasks) || prevStats.inProgressTasks,
+        onHoldTasks: statsUpdate.onHoldTasks != null ? Number(statsUpdate.onHoldTasks) : prevStats.onHoldTasks,
+        cancelledTasks: statsUpdate.cancelledTasks != null ? Number(statsUpdate.cancelledTasks) : prevStats.cancelledTasks,
+        toDoTasks: Number(statsUpdate.toDoTasks) || prevStats.toDoTasks
       }))
     }
   }, [statsUpdate])
@@ -198,17 +198,28 @@ const Statistics = ({ statsUpdate }) => {
 
         <div className="progress-bar">
           <div className="progress-label">Overall Progress</div>
-          <div className="progress-container">
-            <div
-              className="progress-fill"
-              style={{
-                width: stats.totalTasks > 0 ? `${(stats.completedTasks / stats.totalTasks) * 100}%` : '0%'
-              }}
-            ></div>
-          </div>
-          <div className="progress-text">
-            {stats.totalTasks > 0 ? `${Math.round((stats.completedTasks / stats.totalTasks) * 100)}%` : '0%'}
-          </div>
+            <div className="progress-container">
+              <div
+                className="progress-fill"
+                style={{
+                  width: (() => {
+                    const completed = Number(stats.completedTasks) || 0
+                    const total = Number(stats.totalTasks) || 0
+                    const raw = total > 0 ? (completed / total) * 100 : 0
+                    const pct = Math.round(Math.min(Math.max(raw, 0), 100))
+                    return `${pct}%`
+                  })()
+                }}
+              ></div>
+            </div>
+            <div className="progress-text">
+              {(() => {
+                const completed = Number(stats.completedTasks) || 0
+                const total = Number(stats.totalTasks) || 0
+                const raw = total > 0 ? (completed / total) * 100 : 0
+                return `${Math.round(Math.min(Math.max(raw, 0), 100))}%`
+              })()}
+            </div>
         </div>
       </div>
 
