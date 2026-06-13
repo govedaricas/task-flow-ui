@@ -103,13 +103,28 @@ const initSignalR = async () => {
         // Listen for task status changes
         signalRService.on('TaskStatusChanged', (data) => {
         console.log('Received task status change:', data)
-        setTasks(prevTasks =>
-            prevTasks.map(task =>
-                task.id === data.taskId
-                    ? { ...task, taskStatusId: parseInt(data.status) }
-                    : task
-            )
-        )
+        setTasks(prevTasks => {
+          const newTasks = prevTasks.map(task =>
+            task.id === data.taskId
+              ? { ...task, taskStatusId: parseInt(data.status) }
+              : task
+          )
+
+          // Recompute stats and notify parent (for overall progress)
+          if (onStatsUpdate) {
+            const counts = { 1:0,2:0,3:0,4:0,5:0 }
+            newTasks.forEach(t => { counts[t.taskStatusId] = (counts[t.taskStatusId] || 0) + 1 })
+            onStatsUpdate({
+              toDoTasks: counts[1] || 0,
+              inProgressTasks: counts[2] || 0,
+              onHoldTasks: counts[3] || 0,
+              completedTasks: counts[4] || 0,
+              cancelledTasks: counts[5] || 0
+            })
+          }
+
+          return newTasks
+        })
         showToast(`Task "${data.title}" status updated`, 'info')
         })
 
@@ -185,7 +200,21 @@ const initSignalR = async () => {
 
   const handleStatusChange = async (taskId, newStatusId) => {
     // Optimistic update
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, taskStatusId: newStatusId } : t))
+    setTasks(prev => {
+      const newTasks = prev.map(t => t.id === taskId ? { ...t, taskStatusId: newStatusId } : t)
+      if (onStatsUpdate) {
+        const counts = { 1:0,2:0,3:0,4:0,5:0 }
+        newTasks.forEach(t => { counts[t.taskStatusId] = (counts[t.taskStatusId] || 0) + 1 })
+        onStatsUpdate({
+          toDoTasks: counts[1] || 0,
+          inProgressTasks: counts[2] || 0,
+          onHoldTasks: counts[3] || 0,
+          completedTasks: counts[4] || 0,
+          cancelledTasks: counts[5] || 0
+        })
+      }
+      return newTasks
+    })
     try {
       await updateTaskStatus(taskId, newStatusId)
       showToast('Status updated', 'success')
