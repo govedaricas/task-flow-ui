@@ -1,4 +1,4 @@
-import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
+import { HubConnectionBuilder, LogLevel, HttpTransportType } from '@microsoft/signalr'
 
 const API_BASE = import.meta.env.VITE_API_BASE
 
@@ -21,10 +21,10 @@ class SignalRService {
         .withUrl(`${API_BASE}/hubs/task`, {
           accessTokenFactory: () => token,
           skipNegotiation: true,
-          transport: signalR.HttpTransportType.WebSockets
+          transport: HttpTransportType.WebSockets
         })
         .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
-        .configureLogging(signalR.LogLevel.Warning)
+        .configureLogging(LogLevel.Warning)
         .build()
 
       // Keepalive da Render proxy ne ubije konekciju
@@ -90,10 +90,13 @@ class SignalRService {
   async testConnection() {
     try {
       console.log('Testing backend connectivity...')
-      const response = await fetch(`${API_BASE}/api/tasks`, {
+      const response = await fetch(`${API_BASE}/api/tasks/search`, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        },
+        body: JSON.stringify({ pageNumber: 1, pageSize: 1 })
       })
 
       if (response.ok) {

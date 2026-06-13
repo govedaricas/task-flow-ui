@@ -1,7 +1,22 @@
 import api from './api'
 
-export const getAllTasks = async () => {
-  return await api('api/tasks')
+export const getAllTasks = async (query = {}) => {
+  const payload = {}
+  
+  if (query.pageNumber != null) payload.pageNumber = query.pageNumber
+  if (query.pageSize != null) payload.pageSize = query.pageSize
+  if (query.searchTerm) payload.searchTerm = query.searchTerm
+  if (query.name) payload.name = query.name
+  if (query.taskStatusId != null) payload.taskStatusId = query.taskStatusId
+  if (query.taskPriorityId != null) payload.taskPriorityId = query.taskPriorityId
+  if (query.createdAt) payload.createdAt = query.createdAt
+  if (query.sortBy) payload.sortBy = query.sortBy
+  if (query.sortDescending != null) payload.sortDescending = query.sortDescending
+
+  return await api('api/tasks/search', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
 }
 
 export const getTaskById = async (id) => {

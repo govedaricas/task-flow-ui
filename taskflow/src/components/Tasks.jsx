@@ -34,10 +34,15 @@ const Tasks = () => {
             <h3>{task.name}</h3>
             <p>{task.description}</p>
             <p>Status: {task.taskStatus?.name}</p>
-            <select value={task.taskStatusId} onChange={(e) => handleStatusChange(task.id, parseInt(e.target.value))}>
-              <option value={1}>To Do</option>
-              <option value={2}>In Progress</option>
-              <option value={3}>Done</option>
+            <select
+              value={task.taskStatusId}
+              onChange={(e) => handleStatusChange(task.id, Number(e.target.value))}
+            >
+              {Object.entries(STATUS_OPTIONS).map(([id, status]) => (
+                <option key={id} value={id}>
+                  {status.name}
+                </option>
+              ))}
             </select>
           </li>
         ))}

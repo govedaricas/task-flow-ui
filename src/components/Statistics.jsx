@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
+import { getAllTasks } from '../api/tasks'
 import UserProfileModal from './UserProfileModal'
 import { useLoading } from './LoadingContext'
 import './statistics.css'
@@ -11,6 +12,8 @@ const Statistics = ({ statsUpdate }) => {
     totalProjects: 0,
     completedTasks: 0,
     inProgressTasks: 0,
+    onHoldTasks: 0,
+    cancelledTasks: 0,
     toDoTasks: 0
   })
   const [user, setUser] = useState(null)
@@ -20,19 +23,28 @@ const Statistics = ({ statsUpdate }) => {
     const fetchStats = async () => {
       setLoading(true)
       try {
-        const tasks = await api('api/tasks')
+        const tasksResponse = await getAllTasks({ pageNumber: 1, pageSize: 1000 })
         const projects = await api('api/projects/search', {
           method: 'POST',
           body: JSON.stringify({ pageNumber: 1, pageSize: 1000 })
         })
 
-        const taskList = Array.isArray(tasks) ? tasks : []
+        const taskList = Array.isArray(tasksResponse.items)
+          ? tasksResponse.items
+          : Array.isArray(tasksResponse.data)
+            ? tasksResponse.data
+            : Array.isArray(tasksResponse)
+              ? tasksResponse
+              : []
+
         setStats({
           totalTasks: taskList.length,
           totalProjects: projects.data?.length || 0,
+          toDoTasks: taskList.filter(t => t.taskStatusId === 1).length,
+          inProgressTasks: taskList.filter(t => t.taskStatusId === 2).length,
+          onHoldTasks: taskList.filter(t => t.taskStatusId === 3).length,
           completedTasks: taskList.filter(t => t.taskStatusId === 4).length,
-          inProgressTasks: taskList.filter(t => t.taskStatusId === 2 || t.taskStatusId === 3).length,
-          toDoTasks: taskList.filter(t => t.taskStatusId === 1).length
+          cancelledTasks: taskList.filter(t => t.taskStatusId === 5).length
         })
       } catch (error) {
         console.error('Error fetching stats:', error)
@@ -75,6 +87,8 @@ const Statistics = ({ statsUpdate }) => {
         ...prevStats,
         completedTasks: statsUpdate.completedTasks,
         inProgressTasks: statsUpdate.inProgressTasks,
+        onHoldTasks: statsUpdate.onHoldTasks ?? prevStats.onHoldTasks,
+        cancelledTasks: statsUpdate.cancelledTasks ?? prevStats.cancelledTasks,
         toDoTasks: statsUpdate.toDoTasks
       }))
     }
@@ -137,6 +151,26 @@ const Statistics = ({ statsUpdate }) => {
           <div className="stat-content">
             <div className="stat-value">{stats.inProgressTasks}</div>
             <div className="stat-label">In Progress</div>
+          </div>
+        </div>
+
+        <div className="stat-item">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)' }}>
+            ⏸
+          </div>
+          <div className="stat-content">
+            <div className="stat-value">{stats.onHoldTasks}</div>
+            <div className="stat-label">On Hold</div>
+          </div>
+        </div>
+
+        <div className="stat-item">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' }}>
+            ✕
+          </div>
+          <div className="stat-content">
+            <div className="stat-value">{stats.cancelledTasks}</div>
+            <div className="stat-label">Cancelled</div>
           </div>
         </div>
 
