@@ -10,12 +10,11 @@ class SignalRService {
   }
 
   async startConnection() {
-    const token = localStorage.getItem('token')
-    if (!token) return
+    if (!localStorage.getItem('token')) return
 
     this.connection = new HubConnectionBuilder()
       .withUrl(`${API_BASE}/hubs/task`, {
-        accessTokenFactory: () => token,
+        accessTokenFactory: () => localStorage.getItem('token'),
         skipNegotiation: true,
         transport: HttpTransportType.WebSockets
       })
