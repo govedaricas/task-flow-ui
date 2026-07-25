@@ -67,70 +67,56 @@ const Tasks = ({ onStatsUpdate }) => {
   // SignalR + initial fetch
   // ─────────────────────────────────────────────────────
   useEffect(() => {
-const initSignalR = async () => {
-      const token = localStorage.getItem('token')
+    const token = localStorage.getItem('token')
+    if (!token) return
 
-      // Only try to connect if we have a token
-      if (!token) {
-        console.log('No token found, skipping SignalR connection')
-        return
-      }
-
+    const initSignalR = async () => {
       try {
-        // First test if backend is reachable
-        const isBackendReachable = await signalRService.testConnection()
-        if (!isBackendReachable) {
-          console.log('Backend not reachable, skipping SignalR connection')
-          return
-        }
-
         await signalRService.startConnection()
 
         // Listen for project statistics changes
         signalRService.on('ProjectStatisticsChanged', (projectStats) => {
-        console.log('Received project statistics update:', projectStats)
-        if (onStatsUpdate && projectStats.stats) {
+          if (onStatsUpdate && projectStats.stats) {
             onStatsUpdate({
-                toDoTasks: projectStats.stats.todoCount ?? projectStats.stats.TodoCount ?? 0,
-                inProgressTasks: projectStats.stats.inProgressCount ?? projectStats.stats.InProgressCount ?? 0,
-                onHoldTasks: projectStats.stats.onHoldCount ?? projectStats.stats.OnHoldCount ?? projectStats.stats.onHold ?? 0,
-                cancelledTasks: projectStats.stats.cancelledCount ?? projectStats.stats.CancelledCount ?? projectStats.stats.cancelled ?? 0,
-                completedTasks: projectStats.stats.doneCount ?? projectStats.stats.DoneCount ?? 0,
-                lastActivityAt: projectStats.stats.lastActivityAt ?? projectStats.stats.LastActivityAt
-            })
-        }
-    })
-        // Listen for task status changes
-        signalRService.on('TaskStatusChanged', (data) => {
-        console.log('Received task status change:', data)
-        setTasks(prevTasks => {
-          const newTasks = prevTasks.map(task =>
-            task.id === data.taskId
-              ? { ...task, taskStatusId: parseInt(data.status) }
-              : task
-          )
-
-          // Recompute stats and notify parent (for overall progress)
-          if (onStatsUpdate) {
-            const counts = { 1:0,2:0,3:0,4:0,5:0 }
-            newTasks.forEach(t => { counts[t.taskStatusId] = (counts[t.taskStatusId] || 0) + 1 })
-            onStatsUpdate({
-              toDoTasks: counts[1] || 0,
-              inProgressTasks: counts[2] || 0,
-              onHoldTasks: counts[3] || 0,
-              completedTasks: counts[4] || 0,
-              cancelledTasks: counts[5] || 0
+              toDoTasks: projectStats.stats.todoCount ?? projectStats.stats.TodoCount ?? 0,
+              inProgressTasks: projectStats.stats.inProgressCount ?? projectStats.stats.InProgressCount ?? 0,
+              onHoldTasks: projectStats.stats.onHoldCount ?? projectStats.stats.OnHoldCount ?? projectStats.stats.onHold ?? 0,
+              cancelledTasks: projectStats.stats.cancelledCount ?? projectStats.stats.CancelledCount ?? projectStats.stats.cancelled ?? 0,
+              completedTasks: projectStats.stats.doneCount ?? projectStats.stats.DoneCount ?? 0,
+              lastActivityAt: projectStats.stats.lastActivityAt ?? projectStats.stats.LastActivityAt
             })
           }
-
-          return newTasks
         })
-        showToast(`Task "${data.title}" status updated`, 'info')
+
+        // Listen for task status changes
+        signalRService.on('TaskStatusChanged', (data) => {
+          setTasks(prevTasks => {
+            const newTasks = prevTasks.map(task =>
+              task.id === data.taskId
+                ? { ...task, taskStatusId: parseInt(data.status) }
+                : task
+            )
+
+            // Recompute stats and notify parent (for overall progress)
+            if (onStatsUpdate) {
+              const counts = { 1:0,2:0,3:0,4:0,5:0 }
+              newTasks.forEach(t => { counts[t.taskStatusId] = (counts[t.taskStatusId] || 0) + 1 })
+              onStatsUpdate({
+                toDoTasks: counts[1] || 0,
+                inProgressTasks: counts[2] || 0,
+                onHoldTasks: counts[3] || 0,
+                completedTasks: counts[4] || 0,
+                cancelledTasks: counts[5] || 0
+              })
+            }
+
+            return newTasks
+          })
+          showToast(`Task "${data.title}" status updated`, 'info')
         })
 
         // Listen for task comments
         signalRService.on('TaskCommentAdded', (data) => {
-          console.log('Received task comment:', data)
           showToast(`New comment on "${data.title}": ${data.comment}`, 'info')
         })
       } catch (error) {
@@ -504,6 +490,20 @@ const initSignalR = async () => {
                           </div>
                         </div>
 
+                        {/* Status control — works without drag-and-drop, so it's the
+                            reliable way to move a task on touch devices */}
+                        <div className="card-status-row" onClick={e => e.stopPropagation()}>
+                          <select
+                            className="status-select"
+                            value={task.taskStatusId}
+                            onChange={e => handleStatusChange(task.id, Number(e.target.value))}
+                          >
+                            {Object.entries(STATUS_OPTIONS).map(([id, s]) => (
+                              <option key={id} value={id}>{s.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
                         {/* Description */}
                         {task.description && (
                           <p className="card-desc">{task.description}</p>
@@ -620,9 +620,19 @@ const initSignalR = async () => {
               <div className="task-info-section">
                 <div className="task-info-header">
                   <h3>{selectedTask.name}</h3>
-                  <span className={`status-badge status-${selectedTask.taskStatusId}`}>
-                    {STATUS_OPTIONS[selectedTask.taskStatusId]?.name}
-                  </span>
+                  <select
+                    className={`status-badge status-select-badge status-${selectedTask.taskStatusId}`}
+                    value={selectedTask.taskStatusId}
+                    onChange={e => {
+                      const newStatusId = Number(e.target.value)
+                      handleStatusChange(selectedTask.id, newStatusId)
+                      setSelectedTask(prev => prev ? { ...prev, taskStatusId: newStatusId } : prev)
+                    }}
+                  >
+                    {Object.entries(STATUS_OPTIONS).map(([id, s]) => (
+                      <option key={id} value={id}>{s.name}</option>
+                    ))}
+                  </select>
                 </div>
                 {selectedTask.description && (
                   <div className="task-description">
@@ -702,6 +712,12 @@ const initSignalR = async () => {
             </div>
 
             <div className="modal-actions">
+              <button
+                className="btn-cancel confirm-delete-outline"
+                onClick={() => { setShowTaskDetails(false); setSelectedTaskToDelete(selectedTask); setShowDeleteConfirm(true) }}
+              >
+                Delete
+              </button>
               <button className="btn-cancel" onClick={() => setShowTaskDetails(false)}>Close</button>
               <button className="btn-submit" onClick={() => { setShowTaskDetails(false); openEditModal(selectedTask) }}>
                 Edit task

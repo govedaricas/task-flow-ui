@@ -16,13 +16,13 @@ const Navbar = ({ activeView, onNavigate }) => {
           <li className={`nav-item ${activeView === 'tasks' ? 'active' : ''}`}>
             <button onClick={() => onNavigate('tasks')} className="nav-link">
               <span className="nav-icon">✓</span>
-              Tasks
+              <span className="nav-label">Tasks</span>
             </button>
           </li>
           <li className={`nav-item ${activeView === 'projects' ? 'active' : ''}`}>
             <button onClick={() => onNavigate('projects')} className="nav-link">
               <span className="nav-icon">📁</span>
-              Projects
+              <span className="nav-label">Projects</span>
             </button>
           </li>
         </ul>
@@ -30,7 +30,7 @@ const Navbar = ({ activeView, onNavigate }) => {
         <div className="navbar-actions">
           <button onClick={logout} className="logout-btn">
             <span>🚪</span>
-            Logout
+            <span className="nav-label">Logout</span>
           </button>
         </div>
       </div>

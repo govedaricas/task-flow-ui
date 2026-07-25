@@ -18,6 +18,7 @@ const Statistics = ({ statsUpdate }) => {
   })
   const [user, setUser] = useState(null)
   const [showProfileModal, setShowProfileModal] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -65,7 +66,9 @@ const Statistics = ({ statsUpdate }) => {
             setUser({ name: username, email: email || 'user@example.com' })
             return
           }
-        } catch {}
+        } catch {
+          // fall through to the localStorage fallback below
+        }
 
         // Fallback to localStorage userInfo
         const userInfo = localStorage.getItem('userInfo')
@@ -85,32 +88,44 @@ const Statistics = ({ statsUpdate }) => {
     if (statsUpdate) {
       setStats(prevStats => ({
         ...prevStats,
-        completedTasks: Number(statsUpdate.completedTasks) || prevStats.completedTasks,
-        inProgressTasks: Number(statsUpdate.inProgressTasks) || prevStats.inProgressTasks,
+        completedTasks: statsUpdate.completedTasks != null ? Number(statsUpdate.completedTasks) : prevStats.completedTasks,
+        inProgressTasks: statsUpdate.inProgressTasks != null ? Number(statsUpdate.inProgressTasks) : prevStats.inProgressTasks,
         onHoldTasks: statsUpdate.onHoldTasks != null ? Number(statsUpdate.onHoldTasks) : prevStats.onHoldTasks,
         cancelledTasks: statsUpdate.cancelledTasks != null ? Number(statsUpdate.cancelledTasks) : prevStats.cancelledTasks,
-        toDoTasks: Number(statsUpdate.toDoTasks) || prevStats.toDoTasks
+        toDoTasks: statsUpdate.toDoTasks != null ? Number(statsUpdate.toDoTasks) : prevStats.toDoTasks
       }))
     }
   }, [statsUpdate])
+
+  const totalTasksNum = Number(stats.totalTasks) || 0
+  const completedTasksNum = Number(stats.completedTasks) || 0
+  const progressPct = totalTasksNum > 0
+    ? Math.round(Math.min(Math.max((completedTasksNum / totalTasksNum) * 100, 0), 100))
+    : 0
 
   return (
     <>
       <div className="statistics-panel">
 
+        {/* Mobile-only: tap to expand the full stats below */}
+        <button
+          type="button"
+          className="stats-toggle"
+          onClick={() => setCollapsed(c => !c)}
+          aria-expanded={!collapsed}
+        >
+          <span className="stats-toggle-summary">
+            📊 {stats.totalTasks} tasks · {progressPct}% done
+          </span>
+          <span className="stats-toggle-icon">{collapsed ? '▾' : '▴'}</span>
+        </button>
+
+        <div className={`stats-body ${collapsed ? 'collapsed' : ''}`}>
+
         {/* Clickable user card */}
         <div
-          className="user-card"
+          className="user-card user-card-clickable"
           onClick={() => setShowProfileModal(true)}
-          style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
-          onMouseEnter={e => {
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59,130,246,0.15)'
-            e.currentTarget.style.borderColor = '#93c5fd'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)'
-            e.currentTarget.style.borderColor = '#e2e8f0'
-          }}
           title="Click to edit profile"
         >
           <div className="user-avatar">👤</div>
@@ -118,8 +133,7 @@ const Statistics = ({ statsUpdate }) => {
             <h4 className="user-name">{user?.name || 'Profile'}</h4>
             <p className="user-email">{user?.email || 'user@example.com'}</p>
           </div>
-          {/* Edit hint icon */}
-          <span style={{ color: '#94a3b8', fontSize: '16px', marginLeft: 'auto' }}>✎</span>
+          <span className="user-edit-hint">✎</span>
         </div>
 
         <div className="stats-divider"></div>
@@ -198,28 +212,12 @@ const Statistics = ({ statsUpdate }) => {
 
         <div className="progress-bar">
           <div className="progress-label">Overall Progress</div>
-            <div className="progress-container">
-              <div
-                className="progress-fill"
-                style={{
-                  width: (() => {
-                    const completed = Number(stats.completedTasks) || 0
-                    const total = Number(stats.totalTasks) || 0
-                    const raw = total > 0 ? (completed / total) * 100 : 0
-                    const pct = Math.round(Math.min(Math.max(raw, 0), 100))
-                    return `${pct}%`
-                  })()
-                }}
-              ></div>
-            </div>
-            <div className="progress-text">
-              {(() => {
-                const completed = Number(stats.completedTasks) || 0
-                const total = Number(stats.totalTasks) || 0
-                const raw = total > 0 ? (completed / total) * 100 : 0
-                return `${Math.round(Math.min(Math.max(raw, 0), 100))}%`
-              })()}
-            </div>
+          <div className="progress-container">
+            <div className="progress-fill" style={{ width: `${progressPct}%` }}></div>
+          </div>
+          <div className="progress-text">{progressPct}%</div>
+        </div>
+
         </div>
       </div>
 

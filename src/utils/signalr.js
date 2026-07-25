@@ -10,54 +10,32 @@ class SignalRService {
   }
 
   async startConnection() {
-    try {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        console.log('No token found, skipping SignalR connection')
-        return
-      }
+    const token = localStorage.getItem('token')
+    if (!token) return
 
-      this.connection = new HubConnectionBuilder()
-        .withUrl(`${API_BASE}/hubs/task`, {
-          accessTokenFactory: () => token,
-          skipNegotiation: true,
-          transport: HttpTransportType.WebSockets
-        })
-        .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
-        .configureLogging(LogLevel.Warning)
-        .build()
-
-      // Keepalive da Render proxy ne ubije konekciju
-      this.connection.keepAliveIntervalInMilliseconds = 15000
-      this.connection.serverTimeoutInMilliseconds = 60000
-
-      this.connection.onreconnecting(() => {
-        this.isConnected = false
-        console.log('SignalR reconnecting...')
+    this.connection = new HubConnectionBuilder()
+      .withUrl(`${API_BASE}/hubs/task`, {
+        accessTokenFactory: () => token,
+        skipNegotiation: true,
+        transport: HttpTransportType.WebSockets
       })
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+      .configureLogging(LogLevel.Warning)
+      .build()
 
-      this.connection.onreconnected(() => {
-        this.isConnected = true
-        console.log('SignalR reconnected:', this.connection.connectionId)
-      })
+    // Keepalive da Render proxy ne ubije konekciju
+    this.connection.keepAliveIntervalInMilliseconds = 15000
+    this.connection.serverTimeoutInMilliseconds = 60000
 
-      this.connection.onclose(() => {
-        this.isConnected = false
-        console.log('SignalR connection closed')
-      })
+    this.connection.onreconnecting(() => { this.isConnected = false })
+    this.connection.onreconnected(() => { this.isConnected = true })
+    this.connection.onclose(() => { this.isConnected = false })
 
-      await this.connection.start()
-      this.isConnected = true
-      console.log('SignalR connected:', this.connection.connectionId)
+    await this.connection.start()
+    this.isConnected = true
 
-      for (const [event, callback] of this.listeners) {
-        this.connection.on(event, callback)
-      }
-
-    } catch (error) {
-      console.error('SignalR connection failed:', error)
-      this.isConnected = false
-      throw error
+    for (const [event, callback] of this.listeners) {
+      this.connection.on(event, callback)
     }
   }
 
@@ -65,7 +43,6 @@ class SignalRService {
     if (this.connection) {
       await this.connection.stop()
       this.isConnected = false
-      console.log('SignalR connection stopped')
     }
   }
 
@@ -87,30 +64,6 @@ class SignalRService {
     }
   }
 
-  async testConnection() {
-    try {
-      console.log('Testing backend connectivity...')
-      const response = await fetch(`${API_BASE}/api/tasks/search`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ pageNumber: 1, pageSize: 1 })
-      })
-
-      if (response.ok) {
-        console.log('Backend is reachable and responding')
-        return true
-      } else {
-        console.error('Backend responded with error:', response.status, response.statusText)
-        return false
-      }
-    } catch (error) {
-      console.error('Backend is not reachable:', error)
-      return false
-    }
-  }
 }
 
 const signalRService = new SignalRService()

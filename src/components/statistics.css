@@ -1,11 +1,22 @@
 .statistics-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
   padding: 16px;
   background: #fff;
   overflow-y: auto;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Hidden on desktop — the full panel is always visible there */
+.stats-toggle {
+  display: none;
 }
 
 .statistics-panel::-webkit-scrollbar {
@@ -34,6 +45,22 @@
   align-items: center;
   gap: 10px;
   border: 1px solid #e2e8f0;
+}
+
+.user-card-clickable {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.user-card-clickable:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  border-color: #93c5fd;
+}
+
+.user-edit-hint {
+  color: #94a3b8;
+  font-size: 16px;
+  margin-left: auto;
 }
 
 .user-avatar {
@@ -160,11 +187,43 @@
 
 @media (max-width: 768px) {
   .statistics-panel {
+    padding: 10px 12px;
+    height: auto;
+    gap: 8px;
+  }
+
+  .stats-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 4px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    cursor: pointer;
+  }
+
+  .stats-toggle-icon {
+    color: #94a3b8;
+    font-size: 12px;
+  }
+
+  .stats-body {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    padding: 12px;
-    height: auto;
+  }
+
+  .stats-body.collapsed {
+    display: none;
+  }
+
+  .stats-body:not(.collapsed) {
+    max-height: 40vh;
+    overflow-y: auto;
   }
 
   .user-card,
@@ -196,7 +255,7 @@
 }
 
 @media (max-width: 480px) {
-  .statistics-panel {
+  .stats-body {
     grid-template-columns: 1fr;
   }
 }

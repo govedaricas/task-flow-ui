@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../api/api'
+import './UserProfileModal.css'
 
 // Parse JWT token to get user claims
 const parseJwt = (token) => {
@@ -95,186 +96,91 @@ const UserProfileModal = ({ onClose }) => {
 
   return (
     <>
-      {/* Overlay */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed', inset: 0,
-          background: 'rgba(15, 23, 42, 0.55)',
-          zIndex: 1200,
-          backdropFilter: 'blur(2px)'
-        }}
-      />
+      <div className="profile-modal-overlay" onClick={onClose} />
 
-      {/* Modal */}
-      <div style={{
-        position: 'fixed',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 1300,
-        background: 'white',
-        borderRadius: '16px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-        width: '100%',
-        maxWidth: '480px',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        fontFamily: 'inherit'
-      }}>
-        {/* Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-          borderRadius: '16px 16px 0 0',
-          padding: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px'
-        }}>
-          <div style={{
-            width: '56px', height: '56px',
-            background: 'rgba(255,255,255,0.2)',
-            borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '28px', flexShrink: 0
-          }}>👤</div>
-          <div style={{ flex: 1 }}>
-            <h2 style={{ margin: 0, color: 'white', fontSize: '20px', fontWeight: 700 }}>
-              Edit Profile
-            </h2>
-            <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.7)', fontSize: '13px' }}>
-              Update your account information
-            </p>
+      <div className="profile-modal">
+        <div className="profile-modal-header">
+          <div className="profile-modal-avatar">👤</div>
+          <div className="profile-modal-title">
+            <h2>Edit Profile</h2>
+            <p>Update your account information</p>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255,255,255,0.2)', border: 'none',
-              color: 'white', width: '32px', height: '32px',
-              borderRadius: '8px', cursor: 'pointer',
-              fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}
-          >✕</button>
+          <button className="profile-modal-close" onClick={onClose}>✕</button>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: '24px' }}>
+        <div className="profile-modal-body">
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-              Loading...
-            </div>
+            <div className="profile-modal-loading">Loading...</div>
           ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-
-              {/* Username */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b' }}>Username</label>
+            <form onSubmit={handleSubmit} className="profile-form">
+              <div className="profile-field">
+                <label htmlFor="profile-username">Username</label>
                 <input
+                  id="profile-username"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  style={inputStyle}
                   placeholder="Username"
                 />
               </div>
 
-              {/* First + Last name */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b' }}>First Name</label>
+              <div className="profile-form-row">
+                <div className="profile-field">
+                  <label htmlFor="profile-firstName">First Name</label>
                   <input
+                    id="profile-firstName"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
                     required
-                    style={inputStyle}
                     placeholder="First name"
                   />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b' }}>Last Name</label>
+                <div className="profile-field">
+                  <label htmlFor="profile-lastName">Last Name</label>
                   <input
+                    id="profile-lastName"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
                     required
-                    style={inputStyle}
                     placeholder="Last name"
                   />
                 </div>
               </div>
 
-              {/* Email */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b' }}>Email</label>
+              <div className="profile-field">
+                <label htmlFor="profile-email">Email</label>
                 <input
+                  id="profile-email"
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  style={inputStyle}
                   placeholder="email@example.com"
                 />
               </div>
 
-              {/* Active checkbox */}
-              <label style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                cursor: 'pointer', fontSize: '14px', color: '#1e293b', fontWeight: 500
-              }}>
+              <label className="profile-checkbox-label">
                 <input
                   type="checkbox"
                   name="isActive"
                   checked={formData.isActive}
                   onChange={handleChange}
-                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                 />
                 Active Account
               </label>
 
-              {/* Error / Success */}
-              {error && (
-                <div style={{
-                  background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                  color: '#dc2626', borderRadius: '8px', padding: '10px 14px', fontSize: '13px'
-                }}>
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div style={{
-                  background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)',
-                  color: '#059669', borderRadius: '8px', padding: '10px 14px', fontSize: '13px'
-                }}>
-                  ✓ Profile updated successfully!
-                </div>
-              )}
+              {error && <div className="profile-message error">{error}</div>}
+              {success && <div className="profile-message success">✓ Profile updated successfully!</div>}
 
-              {/* Actions */}
-              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  style={{
-                    flex: 1, padding: '11px', background: '#f1f5f9',
-                    color: '#1e293b', border: '1px solid #e2e8f0',
-                    borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: 'pointer'
-                  }}
-                >
+              <div className="profile-form-actions">
+                <button type="button" className="profile-btn-cancel" onClick={onClose}>
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  style={{
-                    flex: 1, padding: '11px',
-                    background: saving ? '#93c5fd' : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                    color: 'white', border: 'none',
-                    borderRadius: '8px', fontSize: '14px', fontWeight: 600,
-                    cursor: saving ? 'not-allowed' : 'pointer'
-                  }}
-                >
+                <button type="submit" className="profile-btn-save" disabled={saving}>
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
@@ -284,19 +190,6 @@ const UserProfileModal = ({ onClose }) => {
       </div>
     </>
   )
-}
-
-const inputStyle = {
-  padding: '10px 12px',
-  border: '1px solid #e2e8f0',
-  borderRadius: '8px',
-  fontSize: '14px',
-  color: '#1e293b',
-  fontFamily: 'inherit',
-  outline: 'none',
-  transition: 'border-color 0.2s',
-  width: '100%',
-  boxSizing: 'border-box'
 }
 
 export default UserProfileModal

@@ -79,17 +79,13 @@
     min-height: 0;
   }
 
+  /* Height follows content: a slim toggle bar when collapsed, capped
+     and scrollable when the user expands it — so tasks keep the space. */
   .sidebar-stats {
     width: 100%;
-    max-height: 40vh;
+    max-height: none;
     border-left: none;
     border-top: 1px solid #e2e8f0;
     flex-shrink: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .sidebar-stats {
-    max-height: 35vh;
   }
 }

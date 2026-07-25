@@ -140,3 +140,31 @@
     font-size: 12px;
   }
 }
+
+/* Below this width, labels are dropped so the bar never overflows */
+@media (max-width: 420px) {
+  .navbar-container {
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .nav-link {
+    padding: 8px 10px;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+  }
+
+  .logout-btn {
+    padding: 8px 10px;
+  }
+}

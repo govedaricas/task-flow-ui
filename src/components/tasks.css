@@ -447,13 +447,7 @@ flex: 1;
 .card-actions {
   display: flex;
   gap: 2px;
-  opacity: 0;
-  transition: opacity 0.15s;
   flex-shrink: 0;
-}
-
-.task-card:hover .card-actions {
-  opacity: 1;
 }
 
 .card-btn {
@@ -474,6 +468,28 @@ flex: 1;
 .card-btn.edit:hover  { background: rgba(59,130,246,0.1); }
 .card-btn.delete { color: #ef4444; }
 .card-btn.delete:hover { background: rgba(239,68,68,0.1); }
+
+/* Status select — primary way to move a task without drag-and-drop */
+.card-status-row {
+  margin-bottom: 6px;
+}
+
+.status-select {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
 
 /* Card description */
 .card-desc {
@@ -721,6 +737,18 @@ flex: 1;
 .confirm-delete { background: #dc2626; }
 .confirm-delete:hover { background: #b91c1c; }
 
+.confirm-delete-outline {
+  flex: none;
+  color: #dc2626;
+  border-color: #fecaca;
+  margin-right: auto;
+}
+
+.confirm-delete-outline:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
 /* ─────────────────────────────────────────────
    Task details modal
 ───────────────────────────────────────────── */
@@ -769,6 +797,14 @@ flex: 1;
 .status-3 { background: rgba(139,92,246,.1);  color: #7c3aed; }
 .status-4 { background: rgba(16,185,129,.1);  color: #059669; }
 .status-5 { background: rgba(239,68,68,.1);   color: #dc2626; }
+
+.status-select-badge {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
 
 .task-description h4 {
   margin: 0 0 8px;
