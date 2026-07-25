@@ -6,17 +6,17 @@ import signalRService from '../utils/signalr'
 import './tasks.css'
 
 const STATUS_OPTIONS = {
-  1: { name: 'New',         color: '#6b7280' },
+  1: { name: 'New', color: '#6b7280' },
   2: { name: 'In Progress', color: '#f59e0b' },
-  3: { name: 'On Hold',     color: '#8b5cf6' },
-  4: { name: 'Completed',        color: '#10b981' },
-  5: { name: 'Cancelled',   color: '#ef4444' },
+  3: { name: 'On Hold', color: '#8b5cf6' },
+  4: { name: 'Completed', color: '#10b981' },
+  5: { name: 'Cancelled', color: '#ef4444' },
 }
 
 const PRIORITY_OPTIONS = {
-  1: { name: 'Low',      cls: 'priority-1' },
-  2: { name: 'Medium',   cls: 'priority-2' },
-  3: { name: 'High',     cls: 'priority-3' },
+  1: { name: 'Low', cls: 'priority-1' },
+  2: { name: 'Medium', cls: 'priority-2' },
+  3: { name: 'High', cls: 'priority-3' },
   4: { name: 'Critical', cls: 'priority-4' },
 }
 
@@ -27,13 +27,13 @@ const Tasks = ({ onStatsUpdate }) => {
   const [tasks, setTasks] = useState([])
 
   // ── Drag & drop ───────────────────────────────────────
-  const [dragTaskId,  setDragTaskId]  = useState(null)
+  const [dragTaskId, setDragTaskId] = useState(null)
   const [dragOverCol, setDragOverCol] = useState(null)
 
   // ── Filters ───────────────────────────────────────────
-  const [showFilters,  setShowFilters]  = useState(false)
-  const [searchTerm,   setSearchTerm]   = useState('')
-  const [filterName,   setFilterName]   = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterName, setFilterName] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterPriority, setFilterPriority] = useState('')
   const [filterCreatedAt, setFilterCreatedAt] = useState('')
@@ -43,16 +43,16 @@ const Tasks = ({ onStatsUpdate }) => {
   const [filterVersion, setFilterVersion] = useState(0)
 
   // ── Modals ────────────────────────────────────────────
-  const [showModal,           setShowModal]           = useState(false)
-  const [showDeleteConfirm,   setShowDeleteConfirm]   = useState(false)
-  const [showTaskDetails,     setShowTaskDetails]     = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showTaskDetails, setShowTaskDetails] = useState(false)
   const [selectedTaskToDelete, setSelectedTaskToDelete] = useState(null)
-  const [selectedTask,        setSelectedTask]        = useState(null)
-  const [editingTask,         setEditingTask]         = useState(null)
+  const [selectedTask, setSelectedTask] = useState(null)
+  const [editingTask, setEditingTask] = useState(null)
 
   // ── Audit ─────────────────────────────────────────────
-  const [auditLogs,       setAuditLogs]       = useState([])
-  const [loadingAudit,    setLoadingAudit]    = useState(false)
+  const [auditLogs, setAuditLogs] = useState([])
+  const [loadingAudit, setLoadingAudit] = useState(false)
   const [showAuditHistory, setShowAuditHistory] = useState(false)
 
   // ── Toast ─────────────────────────────────────────────
@@ -99,7 +99,7 @@ const Tasks = ({ onStatsUpdate }) => {
 
             // Recompute stats and notify parent (for overall progress)
             if (onStatsUpdate) {
-              const counts = { 1:0,2:0,3:0,4:0,5:0 }
+              const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
               newTasks.forEach(t => { counts[t.taskStatusId] = (counts[t.taskStatusId] || 0) + 1 })
               onStatsUpdate({
                 toDoTasks: counts[1] || 0,
@@ -130,7 +130,7 @@ const Tasks = ({ onStatsUpdate }) => {
     return () => {
       signalRService.stopConnection()
     }
-  }, [onStatsUpdate])
+  }, [])
 
   useEffect(() => {
     fetchTasks(pageNumber, pageSize)
@@ -189,7 +189,7 @@ const Tasks = ({ onStatsUpdate }) => {
     setTasks(prev => {
       const newTasks = prev.map(t => t.id === taskId ? { ...t, taskStatusId: newStatusId } : t)
       if (onStatsUpdate) {
-        const counts = { 1:0,2:0,3:0,4:0,5:0 }
+        const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
         newTasks.forEach(t => { counts[t.taskStatusId] = (counts[t.taskStatusId] || 0) + 1 })
         onStatsUpdate({
           toDoTasks: counts[1] || 0,
