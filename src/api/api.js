@@ -14,49 +14,42 @@ const processQueue = (error, token = null) => {
 }
 
 const api = async (endpoint, options = {}) => {
-  try {
-    const res = await fetch(`${API_BASE}/${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getToken()}`,
-        ...options.headers
-      }
-    })
+  const res = await fetch(`${API_BASE}/${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`,
+      ...options.headers
+    }
+  })
 
-    const data = await res.json()
-
-    if (res.ok) return data
-
-    // If 401, try to refresh token
-    if (res.status === 401) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject })
-        }).then(token => {
-          return api(endpoint, options)
-        })
-      }
-
-      isRefreshing = true
-      try {
-        const newToken = await refreshAccessToken()
-        processQueue(null, newToken)
-        isRefreshing = false
-        return api(endpoint, options)
-      } catch (err) {
-        processQueue(err, null)
-        isRefreshing = false
-        clearTokens()
-        window.location.href = '/login'
-        throw new Error('Session expired. Please login again.')
-      }
+  if (res.status === 401) {
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject })
+      }).then(() => api(endpoint, options))
     }
 
-    throw new Error(data?.title || `Request failed: ${res.status}`)
-  } catch (error) {
-    throw error
+    isRefreshing = true
+    try {
+      const newToken = await refreshAccessToken()
+      processQueue(null, newToken)
+      isRefreshing = false
+      return api(endpoint, options)
+    } catch (err) {
+      processQueue(err, null)
+      isRefreshing = false
+      clearTokens()
+      window.location.href = '/login'
+      throw new Error('Session expired. Please login again.')
+    }
   }
+
+  const data = await res.json().catch(() => null)
+
+  if (res.ok) return data
+
+  throw new Error(data?.title || `Request failed: ${res.status}`)
 }
 
 export default api
